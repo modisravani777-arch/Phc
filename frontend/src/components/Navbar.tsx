@@ -5,8 +5,6 @@ import {
   Menu,
   RefreshCw,
   ChevronRight,
-  Search,
-  Activity,
   Home,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -25,7 +23,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   notifications,
   onRefreshNotifications,
 }) => {
-  const { username, facility, refreshFacility, checkConnection } = useAuth();
+  const { facility, refreshFacility, checkConnection } = useAuth();
   const { success } = useToast();
   const [showNotifMenu, setShowNotifMenu] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -80,12 +78,6 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Live Status Pill */}
-        <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/70 text-[11px] font-semibold text-emerald-700 shadow-xs">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 dot-pulse" />
-          <span>Live Synchronized</span>
-        </div>
-
         {/* Workspace Refresh */}
         <button
           onClick={handleRefresh}

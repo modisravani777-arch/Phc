@@ -77,7 +77,7 @@ export interface SchedulePayload {
   notes?: string;
 }
 
-export type StaffRole = 'ASHA' | 'ANM' | 'SUPERVISOR' | 'OTHER';
+export type StaffRole = 'ASHA' | 'ANM' | 'SUPERVISOR' | 'DOCTOR' | 'ADMIN' | 'OTHER';
 
 export interface StaffMember {
   id: string;
@@ -85,6 +85,8 @@ export interface StaffMember {
   role: StaffRole;
   phone: string;
   employee_code: string;
+  villages?: string;
+  assigned_villages?: string[];
 }
 
 export type ReportStatus = 'DRAFT' | 'SUBMITTED' | 'APPROVED';

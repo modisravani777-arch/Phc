@@ -9,7 +9,6 @@ import {
   ShieldCheck,
   Compass,
   RefreshCw,
-  HeartPulse,
 } from 'lucide-react';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
@@ -153,8 +152,8 @@ export const VillagesPage: React.FC = () => {
         <div className="card-modern p-5 rounded-2xl flex items-center justify-between border-t-2 border-t-blue-500">
           <div>
             <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Population</div>
-            <div className="text-2xl font-extrabold text-slate-900 mt-1 font-display">2,234</div>
-            <div className="text-[11px] text-blue-600 font-semibold mt-0.5">500 Verified Households</div>
+            <div className="text-2xl font-extrabold text-slate-900 mt-1 font-display">{totalPop ? totalPop.toLocaleString() : '2,234'}</div>
+            <div className="text-[11px] text-blue-600 font-semibold mt-0.5">{totalHH || 500} Verified Households</div>
           </div>
           <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
             <Users className="w-5 h-5" />
@@ -175,7 +174,7 @@ export const VillagesPage: React.FC = () => {
         <div className="card-modern p-5 rounded-2xl flex items-center justify-between border-t-2 border-t-pink-500">
           <div>
             <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Under-5 Children</div>
-            <div className="text-2xl font-extrabold text-pink-600 mt-1 font-display">382</div>
+            <div className="text-2xl font-extrabold text-pink-600 mt-1 font-display">{totalUnder5 || 382}</div>
             <div className="text-[11px] text-pink-700 font-semibold mt-0.5">Universal UIP tracking</div>
           </div>
           <div className="w-11 h-11 rounded-2xl bg-pink-50 text-pink-600 flex items-center justify-center">

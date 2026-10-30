@@ -4,17 +4,14 @@ import {
   FileSpreadsheet,
   Network,
   ArrowUpRight,
-  Building2,
   ClipboardList,
   Package,
   MapPin,
-  RefreshCw,
   Plus,
   HeartPulse,
   Baby,
   Activity,
   AlertCircle,
-  Phone,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Badge } from '../components/ui/Badge';
@@ -168,10 +165,6 @@ export const DashboardOverview: React.FC = () => {
               <span className="text-[11px] font-extrabold uppercase tracking-widest text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-400/20">
                 National Rural Health Mission
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 text-[11px] font-bold border border-emerald-400/25">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 dot-pulse" />
-                Live Command Active
-              </span>
             </div>
 
             <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white pt-1">
@@ -185,15 +178,6 @@ export const DashboardOverview: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <Button
-              variant="outline"
-              onClick={() => loadData()}
-              className="bg-white/10 hover:bg-white/20 text-white border-white/20 text-xs px-4 py-2.5 rounded-xl backdrop-blur-sm"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-              Sync DB
-            </Button>
-
             <Link to="/app/registers">
               <Button
                 variant="primary"
@@ -349,8 +333,9 @@ export const DashboardOverview: React.FC = () => {
                   <Badge
                     variant={
                       member.role === 'ASHA' ? 'teal'
-                      : member.role === 'ANM' ? 'blue'
+                      : member.role === 'DOCTOR' ? 'blue'
                       : member.role === 'SUPERVISOR' ? 'purple'
+                      : member.role === 'ANM' ? 'pink'
                       : 'slate'
                     }
                     size="sm"
@@ -381,8 +366,9 @@ export const DashboardOverview: React.FC = () => {
                   <Badge
                     variant={
                       member.role === 'ASHA' ? 'teal'
-                      : member.role === 'ANM' ? 'blue'
+                      : member.role === 'DOCTOR' ? 'blue'
                       : member.role === 'SUPERVISOR' ? 'purple'
+                      : member.role === 'ANM' ? 'pink'
                       : 'slate'
                     }
                     size="sm"

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Phone, KeyRound, Mail, LockKeyhole, AlertCircle, Shield, HeartPulse, Building2, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Phone, KeyRound, Mail, LockKeyhole, AlertCircle, Shield, HeartPulse, Building2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/ui/Toast';

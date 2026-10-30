@@ -5,7 +5,6 @@ import {
   Plus,
   AlertOctagon,
   CheckCircle2,
-  Calendar,
   Thermometer,
   RefreshCw,
   Clock,
@@ -144,15 +143,6 @@ export const InventoryPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2.5">
-          <Button
-            variant="outline"
-            onClick={() => loadInventory()}
-            disabled={isLoading}
-            className="text-xs px-3.5 py-2 rounded-xl"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
           <Button
             onClick={() => setIsModalOpen(true)}
             className="bg-blue-600 hover:bg-blue-500 text-white text-xs px-4 py-2 rounded-xl shadow-md shadow-blue-600/25 font-bold"

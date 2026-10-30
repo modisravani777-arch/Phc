@@ -7,7 +7,6 @@ import {
   Filter,
   CheckCircle2,
   AlertCircle,
-  Hash,
   Stethoscope,
   HeartPulse,
   Shield,
@@ -98,8 +97,10 @@ export const StaffPage: React.FC = () => {
 
   const roleIcons: Record<string, React.ReactNode> = {
     ASHA: <HeartPulse className="w-4 h-4 text-emerald-600" />,
-    ANM: <Stethoscope className="w-4 h-4 text-blue-600" />,
     SUPERVISOR: <Shield className="w-4 h-4 text-purple-600" />,
+    DOCTOR: <Stethoscope className="w-4 h-4 text-teal-600" />,
+    ANM: <Stethoscope className="w-4 h-4 text-blue-600" />,
+    ALL: <Users className="w-4 h-4 text-indigo-600" />,
     OTHER: <Users className="w-4 h-4 text-indigo-600" />,
   };
 
@@ -154,17 +155,17 @@ export const StaffPage: React.FC = () => {
       {/* Role Filter Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 stagger-children">
         {[
-          { id: 'ASHA', label: 'ASHA Workers', count: roleCounts['ASHA'] || 5, bg: 'bg-emerald-50' },
-          { id: 'ANM', label: 'ANMs (Nursing)', count: roleCounts['ANM'] || 4, bg: 'bg-blue-50' },
-          { id: 'SUPERVISOR', label: 'Supervisors / CHOs', count: roleCounts['SUPERVISOR'] || 4, bg: 'bg-purple-50' },
-          { id: 'OTHER', label: 'Other Staff', count: roleCounts['OTHER'] || 0, bg: 'bg-indigo-50' },
+          { id: 'ASHA', label: 'ASHA Workers', count: roleCounts['ASHA'] || 0, bg: 'bg-emerald-50' },
+          { id: 'SUPERVISOR', label: 'Health Supervisors', count: roleCounts['SUPERVISOR'] || 0, bg: 'bg-purple-50' },
+          { id: 'DOCTOR', label: 'Medical Officers', count: roleCounts['DOCTOR'] || 0, bg: 'bg-teal-50' },
+          { id: 'ALL', label: 'All Health Personnel', count: staff.length, bg: 'bg-indigo-50' },
         ].map((item) => (
           <div
             key={item.id}
-            onClick={() => setRoleFilter(roleFilter === item.id ? 'ALL' : item.id)}
+            onClick={() => setRoleFilter(item.id)}
             className={`card-modern p-5 rounded-2xl cursor-pointer transition-all ${
               roleFilter === item.id
-                ? 'ring-2 ring-blue-600 shadow-md'
+                ? 'ring-2 ring-blue-600 shadow-md bg-blue-50/20'
                 : ''
             }`}
           >
@@ -197,7 +198,7 @@ export const StaffPage: React.FC = () => {
             <span className="text-xs font-bold text-slate-400 mr-1 flex items-center gap-1">
               <Filter className="w-3.5 h-3.5" /> Filter:
             </span>
-            {['ALL', 'ASHA', 'ANM', 'SUPERVISOR', 'OTHER'].map((r) => (
+            {['ALL', 'ASHA', 'SUPERVISOR', 'DOCTOR', 'ANM'].map((r) => (
               <button
                 key={r}
                 onClick={() => setRoleFilter(r)}
@@ -207,7 +208,7 @@ export const StaffPage: React.FC = () => {
                     : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200/60'
                 }`}
               >
-                {r === 'ALL' ? 'All Personnel' : r}
+                {r === 'ALL' ? 'All Personnel' : r === 'SUPERVISOR' ? 'Supervisors' : r === 'DOCTOR' ? 'Doctors' : r}
               </button>
             ))}
           </div>
@@ -263,8 +264,9 @@ export const StaffPage: React.FC = () => {
                       <Badge
                         variant={
                           member.role === 'ASHA' ? 'teal'
-                          : member.role === 'ANM' ? 'blue'
+                          : member.role === 'DOCTOR' ? 'blue'
                           : member.role === 'SUPERVISOR' ? 'purple'
+                          : member.role === 'ANM' ? 'pink'
                           : 'slate'
                         }
                       >
@@ -345,8 +347,9 @@ export const StaffPage: React.FC = () => {
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none bg-white font-semibold"
               >
                 <option value="ASHA">ASHA (Accredited Social Health Activist)</option>
-                <option value="ANM">ANM (Auxiliary Nurse Midwife)</option>
                 <option value="SUPERVISOR">Supervisor / Public Health Officer</option>
+                <option value="DOCTOR">Medical Officer (Doctor)</option>
+                <option value="ANM">ANM (Auxiliary Nurse Midwife)</option>
                 <option value="OTHER">Other Clinical Personnel</option>
               </select>
             </div>

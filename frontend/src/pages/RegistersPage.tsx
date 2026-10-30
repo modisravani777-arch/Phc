@@ -5,23 +5,21 @@ import {
   Plus,
   Baby,
   Syringe,
-  AlertTriangle,
   UserCheck,
   RefreshCw,
   Eye,
   HeartPulse,
-  Activity,
-  Filter,
 } from 'lucide-react';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
-import { ClinicalRegisterEntry } from '../types';
+import { ClinicalRegisterEntry, StaffMember } from '../types';
 import { api } from '../lib/api';
 import { useToast } from '../components/ui/Toast';
 
 export const RegistersPage: React.FC = () => {
   const [entries, setEntries] = useState<ClinicalRegisterEntry[]>([]);
+  const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('ALL');
@@ -66,6 +64,12 @@ export const RegistersPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, [loadRegisters]);
 
+  useEffect(() => {
+    api.getStaff()
+      .then((data) => setStaffList(data || []))
+      .catch(() => {});
+  }, []);
+
   const handleCreateEntry = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.patient_name || !formData.village) return;
@@ -87,7 +91,7 @@ export const RegistersPage: React.FC = () => {
           hemoglobin: formData.hemoglobin ? Number(formData.hemoglobin) : undefined,
         },
         details: formData.details,
-        assigned_worker: formData.assigned_worker || 'Duty ANM / CHO',
+        assigned_worker: formData.assigned_worker || undefined,
         status: formData.status,
       });
 
@@ -312,8 +316,13 @@ export const RegistersPage: React.FC = () => {
                           {item.patient_name.slice(0, 2).toUpperCase()}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900 text-sm">{item.patient_name}</div>
-                          <div className="text-[11px] text-slate-400 font-mono">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-slate-900 text-sm">{item.patient_name}</span>
+                            <span className="text-[10px] text-slate-400 font-mono font-medium px-1.5 py-0.5 rounded bg-slate-100/90 border border-slate-200/50">
+                              {item.id}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-slate-400 font-mono mt-0.5">
                             {item.age} yrs • {item.gender} • <span className="font-semibold text-slate-600">{item.village}</span>
                           </div>
                         </div>
@@ -520,6 +529,30 @@ export const RegistersPage: React.FC = () => {
                   <option value="REFERRAL">Emergency Facility Referral</option>
                 </select>
               </div>
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">Assigned Frontline Health Worker (ASHA / ANM)</label>
+              <select
+                value={formData.assigned_worker}
+                onChange={(e) => {
+                  const selected = staffList.find(s => s.full_name === e.target.value);
+                  const firstVillage = selected?.villages ? selected.villages.split(',')[0].trim() : '';
+                  setFormData({
+                    ...formData,
+                    assigned_worker: e.target.value,
+                    village: !formData.village && firstVillage ? firstVillage : formData.village
+                  });
+                }}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-semibold bg-white"
+              >
+                <option value="">Auto-Assign (Intelligent Village / Facility Matching)</option>
+                {staffList.map((worker) => (
+                  <option key={worker.id} value={worker.full_name}>
+                    {worker.full_name} ({worker.role}{worker.villages ? ` • ${worker.villages}` : ''})
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Vitals */}

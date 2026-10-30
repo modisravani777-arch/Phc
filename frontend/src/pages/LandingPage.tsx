@@ -3,9 +3,6 @@ import { Link } from 'react-router-dom';
 import {
   ArrowRight,
   BarChart3,
-  Building2,
-  CalendarDays,
-  FileCheck,
   HeartPulse,
   Users,
   ShieldCheck,
