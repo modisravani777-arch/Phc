@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BadgeCheck, Building, Mail, MapPin, Phone, Save } from 'lucide-react';
+import { BadgeCheck, Building, Mail, MapPin, Phone, Save, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
 import { useToast } from '../components/ui/Toast';
@@ -88,7 +88,7 @@ export const SettingsPage: React.FC = () => {
   );
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto max-w-5xl space-y-6 pb-12 animate-fade-in">
       <header className="border-b border-slate-200/70 pb-5">
         <div className="mb-1 text-xs font-bold uppercase tracking-widest text-brand-600">
           {role === 'PHC' ? 'Primary Health Centre' : 'Sub-Centre'}
@@ -149,9 +149,21 @@ export const SettingsPage: React.FC = () => {
             </div>
           )}
 
-          <div className="flex justify-end border-t border-slate-100 pt-4">
-            <Button type="submit" variant="primary" isLoading={isSaving} icon={<Save className="h-4 w-4" />}>
-              Save profile
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-slate-100 pt-6 mt-6">
+            <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+              <span>All updates will reflect across clinical registers and staff directories.</span>
+            </div>
+
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              isLoading={isSaving}
+              className="px-7 py-3 font-extrabold rounded-2xl text-xs sm:text-sm bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/35 transition-all self-end sm:self-auto shrink-0"
+              icon={<Save className="h-4 w-4 mr-1.5" />}
+            >
+              Save Profile
             </Button>
           </div>
         </form>
