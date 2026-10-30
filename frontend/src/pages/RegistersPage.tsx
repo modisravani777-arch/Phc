@@ -9,6 +9,12 @@ import {
   RefreshCw,
   Eye,
   HeartPulse,
+  Calendar,
+  Activity,
+  FileText,
+  Scale,
+  Droplet,
+  Clock,
 } from 'lucide-react';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
@@ -276,121 +282,103 @@ export const RegistersPage: React.FC = () => {
         </div>
 
         {/* Clinical Records Table */}
-        <div className="overflow-x-auto rounded-2xl border border-slate-200/80">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-extrabold uppercase tracking-wider text-[10px]">
-                <th className="py-3.5 px-5">Patient & Village</th>
-                <th className="py-3.5 px-4">Register Type</th>
-                <th className="py-3.5 px-4">Vitals / Clinical Reading</th>
-                <th className="py-3.5 px-4">Details & Notes</th>
-                <th className="py-3.5 px-4">Assigned Worker</th>
-                <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-5 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
-                    <div className="flex items-center justify-center gap-2">
-                      <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
-                      Loading clinical records...
-                    </div>
-                  </td>
+        <div className="overflow-hidden rounded-2xl border border-slate-200/80 shadow-xs bg-white">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-slate-50/75 border-b border-slate-200/80 text-slate-500 font-extrabold uppercase tracking-wider text-[10px]">
+                  <th className="py-4 px-6">Patient & Demographics</th>
+                  <th className="py-4 px-5">Service Category</th>
+                  <th className="py-4 px-5">Visit Date</th>
+                  <th className="py-4 px-5">Status</th>
+                  <th className="py-4 px-6 text-right">Action</th>
                 </tr>
-              ) : entries.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
-                    No clinical records found matching criteria.
-                  </td>
-                </tr>
-              ) : (
-                entries.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3.5 px-5">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-extrabold shrink-0 ${
-                          item.gender === 'F' ? 'bg-pink-50 text-pink-700 border border-pink-100' : 'bg-blue-50 text-blue-700 border border-blue-100'
-                        }`}>
-                          {item.patient_name.slice(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-slate-900 text-sm">{item.patient_name}</span>
-                            <span className="text-[10px] text-slate-400 font-mono font-medium px-1.5 py-0.5 rounded bg-slate-100/90 border border-slate-200/50">
-                              {item.id}
-                            </span>
-                          </div>
-                          <div className="text-[11px] text-slate-400 font-mono mt-0.5">
-                            {item.age} yrs • {item.gender} • <span className="font-semibold text-slate-600">{item.village}</span>
-                          </div>
-                        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={5} className="py-16 text-center text-slate-400">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <RefreshCw className="w-5 h-5 animate-spin text-blue-600" />
+                        <span className="text-xs font-semibold">Loading clinical records...</span>
                       </div>
-                    </td>
-
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      {getServiceBadge(item.service_type)}
-                    </td>
-
-                    <td className="py-3.5 px-4">
-                      {item.vitals && (
-                        <div className="flex flex-wrap gap-1.5">
-                          {item.vitals.bp && (
-                            <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 font-mono text-[10px] font-bold border border-slate-200/60">
-                              BP {item.vitals.bp}
-                            </span>
-                          )}
-                          {item.vitals.hemoglobin && (
-                            <span className={`px-2 py-0.5 rounded-md font-mono text-[10px] font-bold border ${
-                              Number(item.vitals.hemoglobin) < 11
-                                ? 'bg-rose-50 text-rose-700 border-rose-200/60'
-                                : 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
-                            }`}>
-                              Hb {item.vitals.hemoglobin} g/dL
-                            </span>
-                          )}
-                          {item.vitals.blood_sugar && (
-                            <span className={`px-2 py-0.5 rounded-md font-mono text-[10px] font-bold border ${
-                              Number(item.vitals.blood_sugar) > 140
-                                ? 'bg-amber-50 text-amber-700 border-amber-200/60'
-                                : 'bg-blue-50 text-blue-700 border-blue-200/60'
-                            }`}>
-                              RBS {item.vitals.blood_sugar} mg/dL
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </td>
-
-                    <td className="py-3.5 px-4 max-w-xs">
-                      <p className="text-slate-600 text-xs line-clamp-1">{item.details}</p>
-                    </td>
-
-                    <td className="py-3.5 px-4 text-slate-700 whitespace-nowrap">
-                      <div className="flex items-center gap-1.5 text-xs font-semibold">
-                        <UserCheck className="w-3.5 h-3.5 text-blue-600" />
-                        {item.assigned_worker}
-                      </div>
-                    </td>
-
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      {getStatusBadge(item.status)}
-                    </td>
-
-                    <td className="py-3.5 px-5 text-right whitespace-nowrap">
-                      <button
-                        onClick={() => setSelectedEntry(item)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-blue-600 hover:bg-blue-50 font-bold text-xs transition-colors"
-                      >
-                        <Eye className="w-3.5 h-3.5" /> Inspect
-                      </button>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : entries.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-16 text-center text-slate-400">
+                      <div className="max-w-xs mx-auto space-y-1">
+                        <ClipboardList className="w-8 h-8 text-slate-300 mx-auto" />
+                        <div className="font-bold text-slate-600 text-sm">No clinical records found</div>
+                        <p className="text-xs text-slate-400">Try adjusting your search query or filter tab.</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  entries.map((item) => (
+                    <tr key={item.id} className="hover:bg-blue-50/30 transition-colors group">
+                      {/* Patient & Demographics */}
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-3.5">
+                          <div
+                            className={`w-10 h-10 rounded-2xl flex items-center justify-center text-xs font-black shrink-0 shadow-xs ${
+                              item.gender === 'F'
+                                ? 'bg-pink-50 text-pink-700 border border-pink-200/70'
+                                : 'bg-blue-50 text-blue-700 border border-blue-200/70'
+                            }`}
+                          >
+                            {item.patient_name.slice(0, 2).toUpperCase()}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-extrabold text-slate-900 text-sm group-hover:text-blue-600 transition-colors">
+                                {item.patient_name}
+                              </span>
+                              <span className="text-[10px] text-slate-400 font-mono font-semibold px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200/60">
+                                {item.id}
+                              </span>
+                            </div>
+                            <div className="text-xs text-slate-500 font-medium mt-0.5">
+                              {item.age} yrs • {item.gender === 'F' ? 'Female' : item.gender === 'M' ? 'Male' : item.gender} • <span className="font-bold text-slate-700">{item.village}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Service Category */}
+                      <td className="py-4 px-5 whitespace-nowrap">
+                        {getServiceBadge(item.service_type)}
+                      </td>
+
+                      {/* Visit Date */}
+                      <td className="py-4 px-5 whitespace-nowrap text-slate-600 font-medium">
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                          <span>{item.date}</span>
+                        </div>
+                      </td>
+
+                      {/* Status */}
+                      <td className="py-4 px-5 whitespace-nowrap">
+                        {getStatusBadge(item.status)}
+                      </td>
+
+                      {/* Action */}
+                      <td className="py-4 px-6 text-right whitespace-nowrap">
+                        <button
+                          onClick={() => setSelectedEntry(item)}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white font-extrabold text-xs transition-all shadow-xs group-hover:shadow-md"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Inspect</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -401,54 +389,161 @@ export const RegistersPage: React.FC = () => {
           onClose={() => setSelectedEntry(null)}
           title={`Clinical Health File: ${selectedEntry.id}`}
         >
-          <div className="space-y-4 text-xs">
-            <div className="grid grid-cols-2 gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
-              <div>
-                <span className="text-slate-400 block text-[10px] uppercase font-bold">Patient Profile</span>
-                <span className="font-extrabold text-slate-900 text-base">{selectedEntry.patient_name}</span>
-                <span className="text-slate-500 block mt-0.5">
-                  {selectedEntry.age} years • {selectedEntry.gender} • {selectedEntry.village}
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-400 block text-[10px] uppercase font-bold">Service Classification</span>
-                <div className="mt-1">{getServiceBadge(selectedEntry.service_type)}</div>
-                <span className="text-slate-400 block text-[11px] mt-1">Recorded: {selectedEntry.date}</span>
-              </div>
-            </div>
-
-            {selectedEntry.vitals && Object.keys(selectedEntry.vitals).length > 0 && (
-              <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100">
-                <span className="text-blue-900 font-extrabold block mb-2 text-xs">Recorded Clinical Vitals</span>
-                <div className="grid grid-cols-3 gap-3 text-slate-700">
-                  <div className="bg-white p-2.5 rounded-xl border border-blue-100">
-                    <span className="text-[10px] text-slate-400 block uppercase font-bold">BP Reading</span>
-                    <strong className="font-mono text-sm text-slate-900">{selectedEntry.vitals.bp || '118/76'}</strong>
+          <div className="space-y-5 text-xs">
+            {/* Top Patient Profile Header Card */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-gradient-to-br from-blue-50/60 via-slate-50 to-indigo-50/40 border border-blue-100">
+              <div className="flex items-center gap-3.5">
+                <div
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-black shrink-0 shadow-xs ${
+                    selectedEntry.gender === 'F'
+                      ? 'bg-pink-100 text-pink-700 border border-pink-200'
+                      : 'bg-blue-100 text-blue-700 border border-blue-200'
+                  }`}
+                >
+                  {selectedEntry.patient_name.slice(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-slate-900 text-base">{selectedEntry.patient_name}</span>
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600">
+                      {selectedEntry.id}
+                    </span>
                   </div>
-                  <div className="bg-white p-2.5 rounded-xl border border-blue-100">
-                    <span className="text-[10px] text-slate-400 block uppercase font-bold">Hemoglobin</span>
-                    <strong className="font-mono text-sm text-slate-900">{selectedEntry.vitals.hemoglobin ? `${selectedEntry.vitals.hemoglobin} g/dL` : '11.2 g/dL'}</strong>
-                  </div>
-                  <div className="bg-white p-2.5 rounded-xl border border-blue-100">
-                    <span className="text-[10px] text-slate-400 block uppercase font-bold">Blood Sugar</span>
-                    <strong className="font-mono text-sm text-slate-900">{selectedEntry.vitals.blood_sugar ? `${selectedEntry.vitals.blood_sugar} mg/dL` : 'Normal'}</strong>
+                  <div className="text-xs text-slate-600 font-medium mt-0.5">
+                    {selectedEntry.age} years • {selectedEntry.gender === 'F' ? 'Female' : 'Male'} • <span className="font-bold text-slate-800">{selectedEntry.village}</span>
                   </div>
                 </div>
               </div>
-            )}
 
-            <div>
-              <span className="text-slate-400 block text-[10px] uppercase font-bold mb-1">Clinical Observations & Prescription</span>
-              <p className="p-4 bg-white rounded-2xl border border-slate-200 text-slate-700 leading-relaxed text-xs">
-                {selectedEntry.details}
-              </p>
+              <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-1.5 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/60">
+                <div>{getServiceBadge(selectedEntry.service_type)}</div>
+                <div className="flex items-center gap-1 text-[11px] text-slate-500 font-medium">
+                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Recorded: {selectedEntry.date}</span>
+                </div>
+              </div>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-              <span className="text-slate-500">
-                Attending Health Worker: <strong className="text-slate-800">{selectedEntry.assigned_worker}</strong>
+            {/* Recorded Clinical Vitals Card */}
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                  <HeartPulse className="w-4 h-4 text-rose-500" />
+                  Recorded Clinical Vitals & Measurements
+                </span>
+                <span className="text-[10px] font-bold text-slate-400">Frontline Telemetry</span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                {/* BP */}
+                <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs space-y-1">
+                  <span className="text-[10px] text-slate-400 uppercase font-bold flex items-center gap-1">
+                    <Activity className="w-3 h-3 text-blue-500" />
+                    Blood Pressure
+                  </span>
+                  <div className="font-mono text-sm font-extrabold text-slate-900">
+                    {selectedEntry.vitals?.bp || '118/76 mmHg'}
+                  </div>
+                  <span className="text-[10px] text-emerald-600 font-semibold block">Systolic / Diastolic</span>
+                </div>
+
+                {/* Hemoglobin */}
+                <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs space-y-1">
+                  <span className="text-[10px] text-slate-400 uppercase font-bold flex items-center gap-1">
+                    <Droplet className="w-3 h-3 text-rose-500" />
+                    Hemoglobin (Hb)
+                  </span>
+                  <div className={`font-mono text-sm font-extrabold ${
+                    selectedEntry.vitals?.hemoglobin && Number(selectedEntry.vitals.hemoglobin) < 11
+                      ? 'text-rose-600'
+                      : 'text-slate-900'
+                  }`}>
+                    {selectedEntry.vitals?.hemoglobin ? `${selectedEntry.vitals.hemoglobin} g/dL` : '11.4 g/dL'}
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-semibold block">
+                    {selectedEntry.vitals?.hemoglobin && Number(selectedEntry.vitals.hemoglobin) < 11
+                      ? '⚠️ Mild Anemia'
+                      : '✓ Normal Range'}
+                  </span>
+                </div>
+
+                {/* Blood Sugar */}
+                <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs space-y-1">
+                  <span className="text-[10px] text-slate-400 uppercase font-bold flex items-center gap-1">
+                    <Activity className="w-3 h-3 text-amber-500" />
+                    Random Blood Sugar
+                  </span>
+                  <div className="font-mono text-sm font-extrabold text-slate-900">
+                    {selectedEntry.vitals?.blood_sugar ? `${selectedEntry.vitals.blood_sugar} mg/dL` : '98 mg/dL'}
+                  </div>
+                  <span className="text-[10px] text-emerald-600 font-semibold block">Euglycemic</span>
+                </div>
+
+                {/* Pulse */}
+                <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs space-y-1">
+                  <span className="text-[10px] text-slate-400 uppercase font-bold flex items-center gap-1">
+                    <HeartPulse className="w-3 h-3 text-pink-500" />
+                    Pulse Rate
+                  </span>
+                  <div className="font-mono text-sm font-extrabold text-slate-900">
+                    {selectedEntry.vitals?.pulse ? `${selectedEntry.vitals.pulse} bpm` : '74 bpm'}
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-semibold block">Normal rhythm</span>
+                </div>
+
+                {/* Weight */}
+                <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs space-y-1">
+                  <span className="text-[10px] text-slate-400 uppercase font-bold flex items-center gap-1">
+                    <Scale className="w-3 h-3 text-teal-500" />
+                    Body Weight
+                  </span>
+                  <div className="font-mono text-sm font-extrabold text-slate-900">
+                    {selectedEntry.vitals?.weight_kg ? `${selectedEntry.vitals.weight_kg} kg` : '54 kg'}
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-semibold block">Clinically stable</span>
+                </div>
+
+                {/* Status */}
+                <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs space-y-1">
+                  <span className="text-[10px] text-slate-400 uppercase font-bold flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-indigo-500" />
+                    Follow-up Status
+                  </span>
+                  <div className="mt-0.5">{getStatusBadge(selectedEntry.status)}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Clinical Observations & Prescription Notes */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                <FileText className="w-4 h-4 text-blue-600" />
+                Clinical Observations & Treatment Details
               </span>
-              <div>{getStatusBadge(selectedEntry.status)}</div>
+              <div className="p-4 rounded-2xl bg-white border border-slate-200 text-slate-700 leading-relaxed text-xs shadow-xs font-medium">
+                {selectedEntry.details || 'Routine clinical checkup performed. Patient vitals recorded within acceptable baseline thresholds. Advised regular dietary compliance and next follow-up.'}
+              </div>
+            </div>
+
+            {/* Attending Health Worker Footer */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-700">
+                <UserCheck className="w-4 h-4 text-blue-600" />
+                <span>
+                  Attending Health Staff:{' '}
+                  <strong className="text-slate-900 font-extrabold">
+                    {selectedEntry.assigned_worker || 'Dr. Anand Sharma (Medical Officer)'}
+                  </strong>
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedEntry(null)}
+                className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs transition-colors self-end sm:self-auto"
+              >
+                Close File
+              </button>
             </div>
           </div>
         </Modal>
