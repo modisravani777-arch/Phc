@@ -10,7 +10,9 @@ import {
   Baby,
   Activity,
   CheckCircle2,
-  Sparkles,
+  Building2,
+  ChevronRight,
+  Stethoscope,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { FractalDotGrid } from '../components/ui/FractalDotGrid';
@@ -20,37 +22,43 @@ const features = [
     icon: Users,
     title: 'Catchment Demographics & Families',
     description: 'Real-time census covering 2,234 verified citizens and 500 households across 6 rural sectors.',
-    color: 'bg-blue-50 text-blue-600',
+    badge: 'Demographics',
+    accent: 'from-blue-500/10 to-indigo-500/10 border-blue-200/60 text-blue-600',
   },
   {
     icon: HeartPulse,
-    title: 'Maternal & Child Health (RMNCH+A)',
+    title: 'Maternal Care (RMNCH+A)',
     description: 'Track 81 active pregnancies with LMP, EDD calculations, TT vaccination, and Hb testing.',
-    color: 'bg-pink-50 text-pink-600',
+    badge: 'Maternal Care',
+    accent: 'from-pink-500/10 to-rose-500/10 border-pink-200/60 text-pink-600',
   },
   {
     icon: Baby,
     title: 'Universal Immunization (UIP)',
-    description: 'Monitor 382 infants and children with cold-chain vaccine history (BCG, OPV, Penta, MR) and MUAC nutritional status.',
-    color: 'bg-teal-50 text-teal-600',
+    description: 'Monitor 382 infants and children with cold-chain vaccine history (BCG, OPV, Penta, MR).',
+    badge: 'Child Health',
+    accent: 'from-teal-500/10 to-emerald-500/10 border-teal-200/60 text-teal-600',
   },
   {
     icon: Package,
     title: 'Cold-Chain & Pharmacy Logistics',
-    description: 'Centralized drug inventory tracking Essential Medicines, 2°C–8°C vaccines, buffer thresholds, and expiry alerts.',
-    color: 'bg-amber-50 text-amber-600',
+    description: 'Centralized drug inventory tracking Essential Medicines, 2°C–8°C vaccines, and expiry alerts.',
+    badge: 'Logistics',
+    accent: 'from-amber-500/10 to-orange-500/10 border-amber-200/60 text-amber-600',
   },
   {
     icon: Activity,
     title: 'NCD & Chronic Care Surveillance',
-    description: 'Hypertension and Diabetes screening clinics with BP and blood glucose tracking for 95 high-risk patients.',
-    color: 'bg-indigo-50 text-indigo-600',
+    description: 'Hypertension and Diabetes screening clinics with BP and blood glucose tracking for high-risk patients.',
+    badge: 'Chronic Care',
+    accent: 'from-indigo-500/10 to-purple-500/10 border-indigo-200/60 text-indigo-600',
   },
   {
     icon: BarChart3,
-    title: 'National Health Mission HMIS Reporting',
+    title: 'HMIS Automated Reporting',
     description: 'Automated periodic returns, monthly M-1 summary reports, and verified Sub-Centre linkage audits.',
-    color: 'bg-emerald-50 text-emerald-600',
+    badge: 'National Reporting',
+    accent: 'from-emerald-500/10 to-teal-500/10 border-emerald-200/60 text-emerald-600',
   },
 ];
 
@@ -58,16 +66,17 @@ export const LandingPage: React.FC = () => {
   const { isAuthenticated, facility } = useAuth();
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] font-sans text-slate-900 selection:bg-blue-500/20">
-      {/* Top Navigation */}
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-md">
+    <div className="min-h-screen bg-[#f8fafc] font-sans text-slate-900 selection:bg-blue-500/20 antialiased">
+      {/* Top Glass Navigation Bar */}
+      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl transition-all">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-8">
+          {/* Brand */}
           <div className="flex items-center gap-3.5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 via-blue-500 to-teal-400 text-xl font-black text-white shadow-lg shadow-blue-500/30">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-teal-400 text-xl font-black text-white shadow-lg shadow-blue-500/25">
               ✚
             </div>
             <div>
-              <div className="text-xl font-extrabold tracking-tight text-slate-900 leading-tight">
+              <div className="text-xl font-black tracking-tight text-slate-900 leading-tight">
                 ArogyaSathi
               </div>
               <div className="text-[10px] font-extrabold uppercase tracking-widest text-blue-600">
@@ -76,19 +85,19 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
+          {/* Right Action */}
           <div className="flex items-center gap-3">
-            <Link
-              to="/demo"
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:text-indigo-600 hover:border-indigo-200 shadow-xs transition-all"
-            >
-              <Sparkles className="h-3.5 w-3.5 text-indigo-500" />
-              <span>Fractal Grid Studio</span>
-            </Link>
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-700">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>NRHM Central Cloud Sync Active</span>
+            </div>
+
             <Link
               to={isAuthenticated ? '/app/dashboard' : '/login'}
-              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-600/25 transition-all hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-600/30"
+              className="group inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-extrabold text-white shadow-xl shadow-blue-600/25 transition-all duration-200 hover:from-blue-500 hover:to-indigo-500 hover:shadow-2xl hover:shadow-blue-600/35 hover:-translate-y-0.5 active:translate-y-0"
             >
-              {isAuthenticated ? 'Open Clinic Workspace' : 'Sign in to Facility'} <ArrowRight className="h-4 w-4" />
+              <span>{isAuthenticated ? 'Open Clinic Workspace' : 'Sign in to Facility'}</span>
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
         </div>
@@ -96,15 +105,15 @@ export const LandingPage: React.FC = () => {
 
       <main>
         {/* Hero Section */}
-        <section className="relative overflow-hidden py-20 sm:py-28 border-b border-slate-200/80 bg-gradient-to-b from-white via-blue-50/20 to-slate-50">
-          {/* Subtle Live Kinetic Dot Grid */}
-          <div className="absolute inset-0 z-0 opacity-40">
+        <section className="relative overflow-hidden py-20 sm:py-32 border-b border-slate-200/80 bg-gradient-to-b from-white via-blue-50/25 to-slate-50">
+          {/* Live Subtle Kinetic Mathematical Background */}
+          <div className="absolute inset-0 z-0 opacity-40 pointer-events-auto">
             <FractalDotGrid
-              dotSize={4.2}
+              dotSize={4.0}
               dotSpacing={18}
-              dotOpacity={0.45}
+              dotOpacity={0.4}
               waveIntensity={65}
-              waveRadius={220}
+              waveRadius={240}
               waveSpeed={0.85}
               waveMode="harmonic"
               dotColor="#3b82f6"
@@ -115,117 +124,202 @@ export const LandingPage: React.FC = () => {
             />
           </div>
 
-          <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-teal-400/10 rounded-full blur-3xl pointer-events-none" />
+          {/* Ambient Lighting Orbs */}
+          <div className="absolute top-0 right-1/4 w-[420px] h-[420px] bg-blue-400/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-1/4 w-[380px] h-[380px] bg-teal-400/10 rounded-full blur-3xl pointer-events-none" />
 
+          {/* Hero Foreground */}
           <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-8">
             <div className="mx-auto max-w-3xl text-center space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-blue-200/70 bg-blue-50/80 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-xs">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 rounded-full border border-blue-200/80 bg-white/90 backdrop-blur-md px-4 py-1.5 text-xs font-bold text-blue-700 shadow-sm shadow-blue-100">
                 <ShieldCheck className="h-4 w-4 text-blue-600" />
-                <span>Connected Rural Primary Healthcare</span>
+                <span>Verified Rural Health Information Architecture</span>
               </div>
 
-              <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 leading-tight">
+              {/* Headline */}
+              <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 leading-[1.12]">
                 Frontline Health Teams,{' '}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-teal-500">
                   Fully Connected.
                 </span>
               </h1>
 
-              <p className="text-base sm:text-lg leading-relaxed text-slate-600 max-w-2xl mx-auto">
-                A unified operational workspace connecting Sub-Centres and Primary Health Centres — tracking maternal ANC, childhood vaccines, chronic diseases, and emergency danger escalations in real time.
+              {/* Subtext */}
+              <p className="text-base sm:text-lg leading-relaxed text-slate-600 max-w-2xl mx-auto font-medium">
+                A unified operational workspace connecting Sub-Centres and Primary Health Centres — tracking maternal ANC, childhood vaccines, chronic diseases, and field ASHA health workers in real time.
               </p>
 
               {facility && (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-700">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Connected to {facility.name}</span>
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-xs font-bold text-emerald-800 backdrop-blur-sm shadow-xs">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>Authenticated Session: {facility.name}</span>
                 </div>
               )}
 
-              <div className="pt-2 flex flex-wrap items-center justify-center gap-3.5">
+              {/* Buttons */}
+              <div className="pt-3 flex flex-wrap items-center justify-center gap-4">
                 <Link
                   to={isAuthenticated ? '/app/dashboard' : '/login'}
-                  className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-7 py-3.5 text-sm font-extrabold text-white shadow-xl shadow-blue-600/30 transition-all hover:bg-blue-500 hover:-translate-y-0.5"
+                  className="group inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-8 py-4 text-sm font-extrabold text-white shadow-2xl shadow-blue-600/30 transition-all duration-200 hover:from-blue-500 hover:to-indigo-500 hover:shadow-blue-600/40 hover:-translate-y-0.5 active:translate-y-0"
                 >
-                  {isAuthenticated ? 'Go to Command Dashboard' : 'Sign in to Health Facility'} <ArrowRight className="h-4 w-4" />
+                  <Stethoscope className="w-4 h-4" />
+                  <span>{isAuthenticated ? 'Go to Command Dashboard' : 'Sign in to Health Facility'}</span>
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
 
                 <a
                   href="#features"
-                  className="rounded-xl border border-slate-200/90 bg-white px-7 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 shadow-xs"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-slate-200/90 bg-white/90 backdrop-blur-md px-7 py-4 text-sm font-bold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900 hover:-translate-y-0.5"
                 >
-                  Explore Capabilities
+                  <span>Explore Capabilities</span>
+                  <ChevronRight className="w-4 h-4 text-slate-400" />
                 </a>
               </div>
             </div>
 
             {/* Live Operational Metrics Showcase Card */}
-            <div className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-3xl bg-white/90 border border-slate-200/90 shadow-xl backdrop-blur-sm max-w-4xl mx-auto">
-              <div className="p-4 text-center">
-                <div className="text-3xl font-extrabold text-blue-600 font-display">2,234</div>
-                <div className="text-xs font-bold text-slate-500 mt-0.5">Catchment Members</div>
+            <div className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-4 p-5 rounded-3xl bg-white/90 border border-slate-200/80 shadow-2xl shadow-slate-200/50 backdrop-blur-xl max-w-4xl mx-auto">
+              <div className="p-4 text-center space-y-1">
+                <div className="text-3xl sm:text-4xl font-black text-blue-600 tracking-tight">2,234</div>
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Catchment Citizens</div>
+                <div className="text-[10px] text-slate-400">6 Rural Villages</div>
               </div>
-              <div className="p-4 text-center border-l border-slate-100">
-                <div className="text-3xl font-extrabold text-pink-600 font-display">81</div>
-                <div className="text-xs font-bold text-slate-500 mt-0.5">Active ANC Pregnancies</div>
+
+              <div className="p-4 text-center space-y-1 border-l border-slate-100">
+                <div className="text-3xl sm:text-4xl font-black text-pink-600 tracking-tight">81</div>
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active ANC Pregnancies</div>
+                <div className="text-[10px] text-slate-400">RMNCH+A Tracked</div>
               </div>
-              <div className="p-4 text-center border-l border-slate-100">
-                <div className="text-3xl font-extrabold text-teal-600 font-display">382</div>
-                <div className="text-xs font-bold text-slate-500 mt-0.5">Children Immunized</div>
+
+              <div className="p-4 text-center space-y-1 border-l border-slate-100">
+                <div className="text-3xl sm:text-4xl font-black text-teal-600 tracking-tight">382</div>
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Immunized Children</div>
+                <div className="text-[10px] text-slate-400">UIP Schedule OK</div>
               </div>
-              <div className="p-4 text-center border-l border-slate-100">
-                <div className="text-3xl font-extrabold text-amber-600 font-display">6</div>
-                <div className="text-xs font-bold text-slate-500 mt-0.5">Villages Covered</div>
+
+              <div className="p-4 text-center space-y-1 border-l border-slate-100">
+                <div className="text-3xl sm:text-4xl font-black text-amber-600 tracking-tight">14</div>
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Cold-Chain Items</div>
+                <div className="text-[10px] text-slate-400">2°C–8°C Controlled</div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Features Grid */}
-        <section id="features" className="mx-auto max-w-7xl px-4 py-20 sm:px-8">
-          <div className="mx-auto mb-14 max-w-2xl text-center space-y-2">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-blue-600">
-              Clinical Workflows
+        {/* Features Grid Section */}
+        <section id="features" className="py-24 max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-blue-600 bg-blue-50 border border-blue-100 px-3.5 py-1 rounded-full">
+              Full Spectrum Clinical Stack
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
-              Complete Digital Health Management
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+              Purpose-Built for Frontline Primary Care
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500">
-              Built specifically for the operational demands of Indian Primary Healthcare Centres and Sub-Centres.
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-medium">
+              Eliminate paper registry bottlenecks with real-time field-to-facility record keeping.
             </p>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map(({ icon: Icon, title, description, color }) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((feature, i) => (
               <div
-                key={title}
-                className="card-modern rounded-3xl p-7 space-y-4 relative"
+                key={i}
+                className="group relative rounded-3xl border border-slate-200/80 bg-white p-7 shadow-lg shadow-slate-100/60 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1 overflow-hidden"
               >
-                <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${color} shadow-xs`}>
-                  <Icon className="h-6 w-6" />
+                <div className="flex items-center justify-between mb-5">
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border bg-gradient-to-br ${feature.accent}`}>
+                    <feature.icon className="w-6 h-6" />
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-slate-100 text-slate-600">
+                    {feature.badge}
+                  </span>
                 </div>
-                <h3 className="font-extrabold text-slate-900 text-lg">{title}</h3>
-                <p className="text-xs sm:text-sm leading-relaxed text-slate-500">{description}</p>
+
+                <h3 className="text-base font-extrabold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">
+                  {feature.title}
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  {feature.description}
+                </p>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* Two-Tier Architecture Callout */}
+        <section className="py-16 bg-slate-900 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+              <div className="space-y-5">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs font-bold">
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>Two-Tier Care Architecture</span>
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white leading-tight">
+                  Bridging Primary Health Centres & Rural Sub-Centres
+                </h2>
+                <p className="text-slate-300 text-sm leading-relaxed">
+                  Medical Officers at the PHC maintain complete oversight over affiliated Sub-Centres. Clinical visits, ASHA worker fieldwork, high-risk pregnancy alerts, and vaccine distribution stay perfectly synchronized.
+                </p>
+                <div className="pt-2">
+                  <Link
+                    to={isAuthenticated ? '/app/dashboard' : '/login'}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-500 to-teal-400 px-6 py-3.5 text-xs font-extrabold text-white shadow-xl shadow-blue-500/25 transition-all hover:from-blue-400 hover:to-teal-300 hover:-translate-y-0.5"
+                  >
+                    <span>Launch Clinical Workspace</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-6 rounded-3xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-xl space-y-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
+                    PHC
+                  </div>
+                  <div className="text-sm font-extrabold text-white">Primary Health Centre</div>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    Doctor consultations, cold-chain depot, HMIS aggregate reporting, and Sub-Centre supervisory approvals.
+                  </p>
+                </div>
+
+                <div className="p-6 rounded-3xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-xl space-y-3">
+                  <div className="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center font-bold">
+                    SC
+                  </div>
+                  <div className="text-sm font-extrabold text-white">Sub-Centre (Health Post)</div>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    ANM field operations, weekly VHSND immunization camps, home ANC visits, and real-time danger escalations.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200/80 bg-white py-8">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 text-xs text-slate-500 sm:flex-row sm:px-8">
-          <div className="flex items-center gap-2">
-            <span className="font-extrabold text-slate-900">ArogyaSathi Health Platform</span>
-            <span>· National Rural Health Network</span>
+      <footer className="border-t border-slate-200 bg-white py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+          <div className="flex items-center gap-2.5">
+            <span className="font-extrabold text-slate-900">ArogyaSathi</span>
+            <span>·</span>
+            <span>National Rural Health Mission (NRHM) Standard Compliant</span>
           </div>
-          <Link to="/login" className="font-bold text-blue-600 hover:text-blue-700">
-            Facility Sign In →
-          </Link>
+          <div className="flex items-center gap-4 font-semibold text-slate-600">
+            <Link to="/login" className="hover:text-blue-600 transition-colors">
+              Facility Login
+            </Link>
+            <Link to="/app/dashboard" className="hover:text-blue-600 transition-colors">
+              Clinical Workspace
+            </Link>
+          </div>
         </div>
       </footer>
     </div>
   );
 };
+
 export default LandingPage;
