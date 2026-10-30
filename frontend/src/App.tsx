@@ -15,6 +15,7 @@ import { RegistersPage } from './pages/RegistersPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { VillagesPage } from './pages/VillagesPage';
 import { ScheduleCalendarPage } from './pages/ScheduleCalendarPage';
+import ConfigurableFractalDotGridDemo from './components/ConfigurableFractalDotGridDemo';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isLoading, isAuthenticated } = useAuth();
@@ -48,6 +49,8 @@ export const App: React.FC = () => {
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/demo" element={<ConfigurableFractalDotGridDemo />} />
+            <Route path="/fractal" element={<ConfigurableFractalDotGridDemo />} />
 
             {/* Authenticated Application Workspace */}
             <Route

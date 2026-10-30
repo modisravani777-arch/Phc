@@ -10,6 +10,7 @@ import {
   Baby,
   Activity,
   CheckCircle2,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -75,6 +76,13 @@ export const LandingPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <Link
+              to="/demo"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:text-indigo-600 hover:border-indigo-200 shadow-xs transition-all"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-indigo-500" />
+              <span>Fractal Grid Studio</span>
+            </Link>
             <Link
               to={isAuthenticated ? '/app/dashboard' : '/login'}
               className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-600/25 transition-all hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-600/30"
