@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from .models import (
     Asha, Household, Member, Protocol, NeonUser, DangerEscalation,
-    VisitOutcome, FacilityProfile, FacilityLoginIdentity, FacilityIdentifier, FacilityAshaAssignment, FacilityReport,
+    VisitOutcome, FacilityProfile, FacilityLoginIdentity, FacilityIdentifier, FacilityAshaAssignment, FacilityAffiliation, FacilityNotification, FacilityReport,
     FacilitySchedule, FacilityVillage, ClinicalVisit, MedicalInventory,
 )
 
@@ -103,6 +103,18 @@ class FacilityAshaAssignmentAdmin(admin.ModelAdmin):
     list_display = ('facility', 'asha', 'assigned_at')
     list_filter = ('facility',)
     search_fields = ('facility__name', 'asha__asha_name', 'asha__asha_id')
+
+@admin.register(FacilityAffiliation)
+class FacilityAffiliationAdmin(admin.ModelAdmin):
+    list_display = ('subcentre', 'phc', 'status', 'requested_at', 'decided_at')
+    list_filter = ('status', 'phc')
+    search_fields = ('subcentre__name', 'phc__name')
+
+@admin.register(FacilityNotification)
+class FacilityNotificationAdmin(admin.ModelAdmin):
+    list_display = ('facility', 'title', 'is_read', 'created_at', 'read_at')
+    list_filter = ('is_read', 'facility')
+    search_fields = ('title', 'message', 'facility__name')
 
 @admin.register(FacilityReport)
 class FacilityReportAdmin(admin.ModelAdmin):

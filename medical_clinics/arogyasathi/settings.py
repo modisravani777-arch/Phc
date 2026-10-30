@@ -12,7 +12,9 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 if not SECRET_KEY:
     raise RuntimeError("DJANGO_SECRET_KEY must be configured")
 
-DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() in {"1", "true", "yes"}
+DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in {"1", "true", "yes"}
+if not DEBUG and (len(SECRET_KEY) < 50 or SECRET_KEY.startswith("django-insecure-")):
+    raise RuntimeError("DJANGO_SECRET_KEY must be a strong production secret")
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0").split(",") if h.strip()]
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173,http://localhost:8000,http://127.0.0.1:8000").split(",") if o.strip()]
 
@@ -52,39 +54,32 @@ TEST_RUNNER = "core.test_runner.NeonDiscoverRunner"
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 DIRECT_URL = os.environ.get("DIRECT_URL")
-has_psycopg = False
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL must point to the PostgreSQL application database")
+
 try:
     import psycopg
-    from psycopg import pq
-    has_psycopg = True
-except Exception:
-    has_psycopg = False
+except ImportError as exc:
+    raise RuntimeError("psycopg must be installed to use the PostgreSQL database") from exc
 
-if DATABASE_URL and has_psycopg and os.environ.get("FORCE_SQLITE") != "1":
-    IS_TEST_RUN = "test" in sys.argv
-    database_url = DIRECT_URL if IS_TEST_RUN and DIRECT_URL else DATABASE_URL
-    DATABASES = {
-        "default": dj_database_url.parse(
-            database_url,
-            conn_max_age=0 if IS_TEST_RUN else int(os.environ.get("DJANGO_CONN_MAX_AGE", "60")),
-            conn_health_checks=True,
-        )
-    }
-    if IS_TEST_RUN:
-        test_database_name = os.environ.get("DJANGO_TEST_DATABASE_NAME")
-        if not test_database_name:
-            base_name = DATABASES["default"].get("NAME", "arogyasathi")
-            test_database_name = f"test_{base_name}_{os.getpid()}"[:63]
-        DATABASES["default"]["TEST"] = {"NAME": test_database_name}
-    if DATABASES["default"].get("ENGINE") != "django.db.backends.postgresql":
-        raise RuntimeError("DATABASE_URL must point to PostgreSQL")
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
+IS_TEST_RUN = "test" in sys.argv
+TEST_DATABASE_URL = os.environ.get("DJANGO_TEST_DATABASE_URL")
+database_url = TEST_DATABASE_URL if IS_TEST_RUN and TEST_DATABASE_URL else (DIRECT_URL if IS_TEST_RUN and DIRECT_URL else DATABASE_URL)
+DATABASES = {
+    "default": dj_database_url.parse(
+        database_url,
+        conn_max_age=0 if IS_TEST_RUN else int(os.environ.get("DJANGO_CONN_MAX_AGE", "60")),
+        conn_health_checks=True,
+    )
+}
+if IS_TEST_RUN and DATABASES["default"].get("ENGINE") == "django.db.backends.postgresql":
+    test_database_name = os.environ.get("DJANGO_TEST_DATABASE_NAME")
+    if not test_database_name:
+        base_name = DATABASES["default"].get("NAME", "arogyasathi")
+        test_database_name = f"test_{base_name}_{os.getpid()}"[:63]
+    DATABASES["default"]["TEST"] = {"NAME": test_database_name}
+if not IS_TEST_RUN and DATABASES["default"].get("ENGINE") != "django.db.backends.postgresql":
+    raise RuntimeError("DATABASE_URL must point to PostgreSQL")
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -98,6 +93,7 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT") or BASE_DIR / "media")
 MEDIA_URL = "media/"
+H5_DATA_DIR = os.environ.get("H5_DATA_DIR", "")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/dashboard/"
@@ -105,3 +101,7 @@ LOGOUT_REDIRECT_URL = "/"
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
+SECURE_SSL_REDIRECT = os.environ.get("DJANGO_SECURE_SSL_REDIRECT", str(not DEBUG)).lower() in {"1", "true", "yes"}
+SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_SECURE_HSTS_SECONDS", "31536000" if not DEBUG else "0"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG

@@ -78,12 +78,6 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Live Database Sync Badge */}
-        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-[11px] font-bold text-emerald-700">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span>Neon DB Synced</span>
-        </div>
-
         {/* Workspace Refresh */}
         <button
           onClick={handleRefresh}

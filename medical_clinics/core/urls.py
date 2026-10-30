@@ -19,8 +19,8 @@ urlpatterns = [
     path("reports/", views.report_collection, name="reports"),
     path("reports/<uuid:report_id>/download/", views.download_report, name="download-report"),
     path("affiliations/", views.affiliation_collection, name="affiliations"),
-    path("affiliations/<uuid:affiliation_id>/approve/", views.approve_affiliation, name="approve-affiliation"),
-    path("affiliations/<uuid:affiliation_id>/reject/", views.reject_affiliation, name="reject-affiliation"),
+    path("affiliations/<int:affiliation_id>/approve/", views.approve_affiliation, name="approve-affiliation"),
+    path("affiliations/<int:affiliation_id>/reject/", views.reject_affiliation, name="reject-affiliation"),
     path("notifications/", views.notification_collection, name="notifications"),
     path("notifications/<int:notification_id>/read/", views.mark_notification_read, name="notification-read"),
     # Dynamic clinical, inventory, catchment & dashboard endpoints
@@ -29,4 +29,6 @@ urlpatterns = [
     path("villages/", views.village_collection, name="villages"),
     path("stats/", views.stats_overview, name="stats"),
     path("seed/", views.seed_dynamic_data, name="seed"),
+    path("companion/answer/", views.companion_answer, name="companion-answer"),
+    path("companion/visit-list/", views.companion_visit_list, name="companion-visit-list"),
 ]

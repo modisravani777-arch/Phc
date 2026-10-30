@@ -296,6 +296,59 @@ class FacilityAshaAssignment(models.Model):
         ]
 
 
+class FacilityAffiliation(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+    ]
+
+    subcentre = models.OneToOneField(
+        FacilityProfile,
+        on_delete=models.CASCADE,
+        related_name='affiliation_request',
+        limit_choices_to={'facility_type': 'SUBCENTRE'},
+    )
+    phc = models.ForeignKey(
+        FacilityProfile,
+        on_delete=models.CASCADE,
+        related_name='affiliation_requests',
+        limit_choices_to={'facility_type': 'PHC'},
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    decision_reason = models.TextField(blank=True)
+    requested_at = models.DateTimeField(auto_now_add=True)
+    decided_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'clinic_facility_affiliations'
+        ordering = ['-requested_at']
+
+
+class FacilityNotification(models.Model):
+    facility = models.ForeignKey(
+        FacilityProfile,
+        on_delete=models.CASCADE,
+        related_name='notifications',
+    )
+    source_escalation_id = models.UUIDField()
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'clinic_facility_notifications'
+        ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['facility', 'source_escalation_id'],
+                name='unique_facility_escalation_notification',
+            ),
+        ]
+
+
 class FacilityReport(models.Model):
     STATUS_CHOICES = [
         ('DRAFT', 'Draft'),

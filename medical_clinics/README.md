@@ -80,6 +80,26 @@ run at a production database. A real deployment verification should run
 exercise an authenticated GET and POST against the deployed URL and confirm the
 new record remains after logout/login and a restart.
 
+For local automated tests without Neon, set `DJANGO_TEST_DATABASE_URL` to an
+isolated SQLite URL such as `sqlite:////tmp/arogyasathi-tests.sqlite3`. This
+override is accepted only by `manage.py test`; application runtime still
+requires PostgreSQL.
+
+## H5 Frontline Health-Worker Companion
+
+The clinic API includes an offline, protocol-bound H5 companion. Set
+`H5_DATA_DIR` to the provided H5 `data/` directory to enable
+`/api/companion/answer/` and `/api/companion/visit-list/`. Generate the official
+H5 files with:
+
+```powershell
+python generate_h5_submission.py --data-dir <path-to-H5-data> --split test --out submission
+```
+
+The generated folder contains `H5_answers.jsonl`, `H5_visit_list.csv`, and
+`H5_footprint.json`. Keep the H5 data and any downloaded models outside the git
+repository, as required by the challenge pack.
+
 ## Facility sign-in
 
 Phone numbers are read directly from the existing Neon `users.phone` field.

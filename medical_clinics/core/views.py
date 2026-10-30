@@ -15,6 +15,8 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 
+from .h5_assistant import ProtocolAssistant, visit_list
+
 from .models import (
     Asha,
     Household,
@@ -28,6 +30,8 @@ from .models import (
     PhoneLoginChallenge,
     FacilityIdentifier,
     FacilityAshaAssignment,
+    FacilityAffiliation,
+    FacilityNotification,
     FacilityReport,
     FacilitySchedule,
     FacilityVillage,
@@ -76,9 +80,11 @@ def api_login_required(view):
         ).exists():
             return view(request, *args, **kwargs)
 
-        profile = FacilityProfile.objects.filter(account=request.user, is_active=True).first()
-        if not profile:
-            profile = FacilityProfile.objects.filter(is_active=True).first()
+        profile = FacilityProfile.objects.filter(
+            account=request.user,
+            is_active=True,
+            facility_type__in=["PHC", "SUBCENTRE"],
+        ).first()
         if profile:
             request.session["facility_profile_id"] = str(profile.pk)
             request.session["facility_role"] = profile.facility_type
@@ -109,22 +115,28 @@ def _user_role(request):
         if profile:
             return profile.facility_type, profile
 
-    role = request.session.get("facility_role") if hasattr(request, "session") else None
-    fallback_profile = FacilityProfile.objects.filter(is_active=True).first()
-    return role or (fallback_profile.facility_type if fallback_profile else "PHC"), fallback_profile
+    facility_id = request.session.get("facility_profile_id") if hasattr(request, "session") else None
+    if user and user.is_authenticated and facility_id:
+        profile = FacilityProfile.objects.filter(
+            pk=facility_id,
+            account=user,
+            is_active=True,
+            facility_type__in=["PHC", "SUBCENTRE"],
+        ).first()
+        if profile:
+            return profile.facility_type, profile
+    return None, None
 
 
 def _user_facility(request):
     _, profile = _user_role(request)
-    if profile:
-        return profile
-    return FacilityProfile.objects.filter(is_active=True).first()
+    return profile
 
 
 def _visible_facilities(request):
     facility = _user_facility(request)
     if facility is None:
-        return FacilityProfile.objects.filter(is_active=True)
+        return FacilityProfile.objects.none()
     if facility.facility_type == "PHC":
         return FacilityProfile.objects.filter(
             models.Q(pk=facility.pk) | models.Q(parent_phc=facility),
@@ -137,9 +149,7 @@ def _visible_asha_ids(request):
     assigned = list(FacilityAshaAssignment.objects.filter(
         facility__in=_visible_facilities(request),
     ).values_list("asha_id", flat=True))
-    if assigned:
-        return assigned
-    return list(Asha.objects.values_list("asha_id", flat=True))
+    return assigned
 
 
 def _generate_facility_code(facility_type):
@@ -193,6 +203,13 @@ def _facility_json(facility):
         "phc_name": facility.parent_phc.name if facility.parent_phc else "",
         "is_active": facility.is_active,
     }
+
+
+def _h5_data_dir():
+    data_dir = Path(settings.H5_DATA_DIR) if settings.H5_DATA_DIR else None
+    if not data_dir or not (data_dir / "protocols").is_dir():
+        return None
+    return data_dir
 
 
 # =========================================================================
@@ -574,9 +591,18 @@ def facility_me(request):
 @require_http_methods(["GET", "POST"])
 def staff_collection(request):
     if request.method == "GET":
+        visible_facilities = _visible_facilities(request)
         asha_ids = _visible_asha_ids(request)
         ashas = list(Asha.objects.filter(asha_id__in=asha_ids).order_by("asha_name"))
-        users = list(NeonUser.objects.filter(is_active=True).order_by("full_name"))
+        visible_facility_names = visible_facilities.values_list("name", flat=True)
+        users = list(
+            NeonUser.objects.filter(is_active=True)
+            .filter(
+                models.Q(assigned_facility__in=visible_facility_names)
+                | models.Q(assigned_asha_id__in=asha_ids)
+            )
+            .order_by("full_name")
+        )
 
         # Map users by assigned_asha_id and name for clean enrichment without duplicate rows
         user_by_asha = {u.assigned_asha_id: u for u in users if u.assigned_asha_id}
@@ -638,6 +664,11 @@ def staff_collection(request):
             return _error("Create a facility profile before adding staff", 409)
         asha_id = code or f"ASHA-{uuid.uuid4().hex[:4].upper()}"
         villages = str(data.get("villages", "")).strip()
+        existing_asha = Asha.objects.filter(pk=asha_id).first()
+        if existing_asha and FacilityAshaAssignment.objects.filter(asha=existing_asha).exclude(
+            facility__in=_visible_facilities(request)
+        ).exists():
+            return _error("That ASHA is assigned to another facility", 409)
         asha, created = Asha.objects.update_or_create(
             asha_id=asha_id,
             defaults={"asha_name": full_name, "villages": villages}
@@ -658,6 +689,11 @@ def staff_collection(request):
         if facility is None:
             return _error("Create a facility profile before adding staff", 409)
         email = code if "@" in code else f"{uuid.uuid4().hex[:6]}@arogyasathi.in"
+        existing_user = NeonUser.objects.filter(email__iexact=email).first()
+        if existing_user and existing_user.assigned_facility not in set(
+            _visible_facilities(request).values_list("name", flat=True)
+        ):
+            return _error("That staff account is assigned to another facility", 409)
         user, created = NeonUser.objects.update_or_create(
             email=email,
             defaults={
@@ -1023,63 +1059,57 @@ def registers_collection(request):
         "REFERRAL": "EMERGENCY_TRIAGE",
         "EMERGENCY_TRIAGE": "EMERGENCY_TRIAGE",
     }
-    requested_service = service_map.get(raw_service, "GENERAL_OPD")
+    requested_service = service_map.get(raw_service)
+    if requested_service is None:
+        return _error("Choose a valid clinical service type")
+    if not patient_name:
+        return _error("Patient name is required")
+
+    vitals = data.get("vitals", {})
+    if not isinstance(vitals, dict):
+        return _error("Vitals must be an object")
+
+    age = data.get("age")
+    dob = None
+    if age not in (None, ""):
+        try:
+            age = int(age)
+        except (TypeError, ValueError):
+            return _error("Age must be a whole number")
+        if age < 0 or age > 130:
+            return _error("Age must be between 0 and 130")
+        dob = (timezone.now() - timedelta(days=age * 365.2425)).date().isoformat()
 
     # 1. Resolve facility
     facility = _user_facility(request)
     if facility is None:
-        facility = FacilityProfile.objects.filter(is_active=True).first()
-    if facility is None:
-        facility = FacilityProfile.objects.create(
-            facility_code="PHC-PRIMARY",
-            name="Primary Health Centre",
-            facility_type="PHC",
-            block="Chandrapuri",
-            district="Varanasi",
-            state="Uttar Pradesh",
-            is_active=True,
-        )
+        return _error("Create a facility profile before recording a visit", 409)
+
+    asha_ids = _visible_asha_ids(request)
+    if not asha_ids:
+        return _error("Assign an ASHA worker to this facility before recording a visit", 409)
 
     # 2. Resolve ASHA worker intelligently
     worker_name = str(data.get("assigned_worker", "")).strip()
     selected_asha = None
     if worker_name and worker_name.lower() not in ("duty anm / cho", "unassigned", "anm", "staff"):
-        selected_asha = Asha.objects.filter(
-            models.Q(asha_name__iexact=worker_name) |
-            models.Q(asha_name__icontains=worker_name)
-        ).first()
+        selected_asha = Asha.objects.filter(asha_id__in=asha_ids, asha_name__iexact=worker_name).first()
+        if selected_asha is None:
+            return _error("The selected ASHA worker is not assigned to your facility", 400)
 
     if not selected_asha and village:
-        selected_asha = Asha.objects.filter(villages__icontains=village).first()
+        selected_asha = Asha.objects.filter(asha_id__in=asha_ids, villages__icontains=village).first()
 
     if not selected_asha:
-        asha_ids = _visible_asha_ids(request)
-        if asha_ids:
-            selected_asha = Asha.objects.filter(asha_id__in=asha_ids).order_by("asha_name").first()
+        selected_asha = Asha.objects.filter(asha_id__in=asha_ids).order_by("asha_name").first()
+    if selected_asha is None:
+        return _error("No assigned ASHA worker is available for this visit", 409)
 
-    if not selected_asha:
-        selected_asha = Asha.objects.order_by("asha_name").first()
-
-    if not selected_asha:
-        return _error("No registered ASHA frontline health worker available", 400)
-
-    # Ensure assignment exists in FacilityAshaAssignment
-    FacilityAshaAssignment.objects.get_or_create(
-        facility=facility,
-        asha=selected_asha,
-    )
-
-    # 3. Resolve or create household and patient (Member)
-    if not patient_name:
-        patient_name = f"Patient-{uuid.uuid4().hex[:5].upper()}"
-
+    # 3. Resolve or create household and patient (Member), within this ASHA only.
     member = Member.objects.filter(
-        models.Q(name__iexact=patient_name) | models.Q(name__icontains=patient_name),
+        name__iexact=patient_name,
         asha=selected_asha,
     ).first()
-
-    if not member:
-        member = Member.objects.filter(name__iexact=patient_name).first()
 
     if not member:
         household = Household.objects.filter(asha=selected_asha).first()
@@ -1087,18 +1117,10 @@ def registers_collection(request):
             hh_village = village or (selected_asha.villages.split(",")[0].strip() if selected_asha.villages else "Chandrapuri")
             household = Household.objects.create(
                 household_id=f"HH-{uuid.uuid4().hex[:6].upper()}",
-                household_head=f"{patient_name} Family",
+                head_name=patient_name,
                 village=hh_village,
                 asha=selected_asha,
             )
-
-        age = data.get("age")
-        dob = None
-        if age:
-            try:
-                dob = (timezone.now() - datetime.timedelta(days=int(age) * 365.25)).date()
-            except Exception:
-                dob = None
 
         sex = str(data.get("gender", "")).upper()
         if sex not in ("M", "F", "OTHER"):
@@ -1128,7 +1150,7 @@ def registers_collection(request):
         facility=facility,
         service_type=requested_service,
         visit_date=timezone.now().date(),
-        vitals=data.get("vitals", {}) or {},
+        vitals=vitals,
         clinical_notes=str(data.get("details", "")).strip(),
         prescribed_medicines=str(data.get("prescribed_medicines", "")).strip(),
         status=data.get("status", "COMPLETED"),
@@ -1172,7 +1194,9 @@ def inventory_collection(request):
         results = []
         for item in qs:
             status = "IN_STOCK"
-            if item.quantity <= item.reorder_level / 2:
+            if item.expiry_date and item.expiry_date < timezone.localdate():
+                status = "EXPIRED"
+            elif item.quantity <= item.reorder_level / 2:
                 status = "CRITICAL"
             elif item.quantity <= item.reorder_level:
                 status = "LOW_STOCK"
@@ -1202,6 +1226,22 @@ def inventory_collection(request):
         return _error("Item name is required")
 
     code = str(data.get("item_code", "")).strip() or f"MED-{uuid.uuid4().hex[:4].upper()}"
+    category = str(data.get("category", "MEDICINE")).upper()
+    valid_categories = {choice[0] for choice in MedicalInventory._meta.get_field("category").choices}
+    if category not in valid_categories:
+        return _error("Choose a valid inventory category")
+    try:
+        quantity = int(data.get("current_stock", 100))
+        reorder_level = int(data.get("min_reorder_level", 20))
+    except (TypeError, ValueError):
+        return _error("Stock quantity and reorder level must be whole numbers")
+    if quantity < 0 or reorder_level < 0:
+        return _error("Stock quantity and reorder level cannot be negative")
+    expiry_value = str(data.get("expiry_date", "")).strip()
+    try:
+        expiry_date = date.fromisoformat(expiry_value) if expiry_value else None
+    except ValueError:
+        return _error("Expiry date must use YYYY-MM-DD format")
     fac = _user_facility(request)
     if fac is None:
         return _error("Create a facility profile before adding inventory", 409)
@@ -1214,11 +1254,12 @@ def inventory_collection(request):
         defaults={
             "facility": fac,
             "name": name,
-            "category": data.get("category", "MEDICINE"),
+            "category": category,
             "batch_number": data.get("batch_number", "BATCH-01"),
-            "quantity": int(data.get("current_stock", 100)),
+            "quantity": quantity,
             "unit": data.get("unit", "Units"),
-            "reorder_level": int(data.get("min_reorder_level", 20)),
+            "reorder_level": reorder_level,
+            "expiry_date": expiry_date,
             "storage_location": data.get("storage_location", "Main Dispensary"),
         }
     )
@@ -1688,34 +1729,44 @@ def affiliation_collection(request):
                 ).first()
         if phc is None:
             return _error("No active PHC matches that identification code", 400)
-        facility.parent_phc = phc
-        facility.save(update_fields=["parent_phc", "updated_at"])
+        affiliation, _ = FacilityAffiliation.objects.update_or_create(
+            subcentre=facility,
+            defaults={
+                "phc": phc,
+                "status": "PENDING",
+                "decision_reason": "",
+                "decided_at": None,
+            },
+        )
         affiliation = {
-            "id": str(facility.id),
+            "id": str(affiliation.id),
             "subcentre": facility.name,
             "phc": phc.name,
-            "status": "APPROVED",
-            "permissions": ["view_records", "submit_referrals"],
-            "decision_reason": "Connected using the PHC identification code",
+            "status": "PENDING",
+            "permissions": [],
+            "decision_reason": "",
         }
         return JsonResponse({"affiliation": affiliation}, status=201)
 
     if facility is None:
         return JsonResponse({"results": []})
     if facility.facility_type == "PHC":
-        sub_centres = FacilityProfile.objects.filter(parent_phc=facility, is_active=True).select_related("parent_phc")
+        affiliations = FacilityAffiliation.objects.filter(
+            phc=facility,
+            subcentre__is_active=True,
+        ).select_related("subcentre", "phc")
     else:
-        sub_centres = FacilityProfile.objects.filter(pk=facility.pk, parent_phc__isnull=False).select_related("parent_phc")
+        affiliations = FacilityAffiliation.objects.filter(subcentre=facility).select_related("subcentre", "phc")
     results = [
         {
-            "id": str(subcentre.id),
-            "subcentre": subcentre.name,
-            "phc": subcentre.parent_phc.name,
-            "status": "APPROVED",
-            "permissions": ["view_records", "submit_referrals"],
-            "decision_reason": "",
+            "id": str(affiliation.id),
+            "subcentre": affiliation.subcentre.name,
+            "phc": affiliation.phc.name,
+            "status": affiliation.status,
+            "permissions": ["view_records", "submit_referrals"] if affiliation.status == "APPROVED" else [],
+            "decision_reason": affiliation.decision_reason,
         }
-        for subcentre in sub_centres
+        for affiliation in affiliations
     ]
     return JsonResponse({"results": results})
 
@@ -1724,16 +1775,23 @@ def affiliation_collection(request):
 @require_http_methods(["POST"])
 def approve_affiliation(request, affiliation_id):
     facility = _user_facility(request)
-    child = get_object_or_404(
-        FacilityProfile,
+    affiliation = get_object_or_404(
+        FacilityAffiliation.objects.select_related("subcentre"),
         id=affiliation_id,
-        parent_phc=facility,
-        facility_type="SUBCENTRE",
+        phc=facility,
+        status="PENDING",
     )
+    data = _body(request) or {}
+    affiliation.status = "APPROVED"
+    affiliation.decision_reason = str(data.get("reason", "")).strip()
+    affiliation.decided_at = timezone.now()
+    affiliation.save(update_fields=["status", "decision_reason", "decided_at"])
+    affiliation.subcentre.parent_phc = facility
+    affiliation.subcentre.save(update_fields=["parent_phc", "updated_at"])
     return JsonResponse({"affiliation": {
-        "id": str(child.id),
+        "id": str(affiliation.id),
         "status": "APPROVED",
-        "decision_reason": "Sub-Centre is connected to this PHC",
+        "decision_reason": affiliation.decision_reason,
     }})
 
 
@@ -1741,46 +1799,60 @@ def approve_affiliation(request, affiliation_id):
 @require_http_methods(["POST"])
 def reject_affiliation(request, affiliation_id):
     facility = _user_facility(request)
-    child = get_object_or_404(
-        FacilityProfile,
+    affiliation = get_object_or_404(
+        FacilityAffiliation.objects.select_related("subcentre"),
         id=affiliation_id,
-        parent_phc=facility,
-        facility_type="SUBCENTRE",
+        phc=facility,
+        status="PENDING",
     )
-    child.parent_phc = None
-    child.save(update_fields=["parent_phc", "updated_at"])
+    data = _body(request) or {}
+    affiliation.status = "REJECTED"
+    affiliation.decision_reason = str(data.get("reason", "")).strip()
+    affiliation.decided_at = timezone.now()
+    affiliation.save(update_fields=["status", "decision_reason", "decided_at"])
     return JsonResponse({"affiliation": {
-        "id": str(child.id),
+        "id": str(affiliation.id),
         "status": "REJECTED",
-        "decision_reason": "PHC connection removed",
+        "decision_reason": affiliation.decision_reason,
     }})
 
 
 @api_login_required
 @require_http_methods(["GET"])
 def notification_collection(request):
-    # Live notifications based on real danger escalations
-    notifications = []
+    facility = _user_facility(request)
+    if facility is None:
+        return _error("Create a facility profile before viewing notifications", 409)
     escalations = DangerEscalation.objects.filter(
         status="PENDING_TRIAGE",
         asha_id__in=_visible_asha_ids(request),
     ).select_related("asha")
-    for idx, esc in enumerate(escalations):
-        notifications.append({
-            "id": idx + 1,
-            "title": f"🚨 EMERGENCY: {esc.danger_signs[:35]}",
-            "message": f"Patient: {esc.patient_name} in {esc.village}. Escalated by {esc.asha.asha_name}. Urgency: {esc.urgency_level}.",
-            "read": False,
-        })
+    for esc in escalations:
+        FacilityNotification.objects.get_or_create(
+            facility=facility,
+            source_escalation_id=esc.escalation_id,
+            defaults={
+                "title": f"🚨 EMERGENCY: {esc.danger_signs[:35]}",
+                "message": f"Patient: {esc.patient_name} in {esc.village}. Escalated by {esc.asha.asha_name}. Urgency: {esc.urgency_level}.",
+            },
+        )
+    notifications = FacilityNotification.objects.filter(facility=facility)
 
-    return JsonResponse({"results": notifications})
+    return JsonResponse({"results": [
+        {"id": notification.id, "title": notification.title, "message": notification.message, "read": notification.is_read}
+        for notification in notifications
+    ]})
 
 
 @api_login_required
 @require_http_methods(["POST"])
 def mark_notification_read(request, notification_id):
-    if notification_id < 1:
-        return _error("Notification not found", 404)
+    facility = _user_facility(request)
+    notification = get_object_or_404(FacilityNotification, id=notification_id, facility=facility)
+    if not notification.is_read:
+        notification.is_read = True
+        notification.read_at = timezone.now()
+        notification.save(update_fields=["is_read", "read_at"])
     return JsonResponse({"notification": {"id": notification_id, "read": True}})
 
 
@@ -1794,3 +1866,26 @@ def seed_dynamic_data(request):
 @require_http_methods(["GET"])
 def dashboard(request):
     return JsonResponse({"status": "ok", "app": "ArogyaSathi Medical Clinic API"})
+
+
+@api_login_required
+@csrf_protect
+@require_http_methods(["POST"])
+def companion_answer(request):
+    data = _body(request)
+    question = str((data or {}).get("question", "")).strip()
+    if not question:
+        return _error("A protocol question is required")
+    data_dir = _h5_data_dir()
+    if data_dir is None:
+        return _error("The offline H5 protocol pack is not configured", 503)
+    return JsonResponse({"answer": ProtocolAssistant(data_dir).answer(question)})
+
+
+@api_login_required
+@require_http_methods(["GET"])
+def companion_visit_list(request):
+    data_dir = _h5_data_dir()
+    if data_dir is None:
+        return _error("The offline H5 protocol pack is not configured", 503)
+    return JsonResponse({"results": visit_list(data_dir / "household_register.csv")})

@@ -7,6 +7,8 @@ from django.test.runner import DiscoverRunner
 
 class NeonDiscoverRunner(DiscoverRunner):
     def teardown_databases(self, old_config, **kwargs):
+        if connections["default"].settings_dict["ENGINE"] != "django.db.backends.postgresql":
+            return super().teardown_databases(old_config, **kwargs)
         test_database_name = connections["default"].settings_dict["NAME"]
         admin_url = os.environ.get("DIRECT_URL") or os.environ["DATABASE_URL"]
         with psycopg.connect(admin_url) as connection:
