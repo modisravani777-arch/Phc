@@ -125,9 +125,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenRegisterModal, unreadCou
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-200 group ${
+                `flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 group ${
                   isActive
-                    ? 'bg-blue-600 text-white font-semibold shadow-md shadow-blue-600/30'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/30 ring-1 ring-blue-400/30'
                     : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
                 }`
               }
