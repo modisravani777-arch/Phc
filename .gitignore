@@ -5,25 +5,32 @@
 **/.env
 **/.env.*
 !**/.env.example
-medical_clinics/string.txt
+**/string.txt
 
 # Local databases and uploaded data
 *.sqlite3
-medical_clinics/media/
-medical_clinics/staticfiles/
+*.db
+data/
+models/
+FULL_CODE/backend/media/
+FULL_CODE/backend/staticfiles/
 
 # Python
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .venv/
+**/.venv/
 venv/
 venv_mac/
 
 # Node and generated frontend output
 node_modules/
 dist/
+build/
+coverage/
 *.tsbuildinfo
+*.log
 
 # Operating system
 .DS_Store

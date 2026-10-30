@@ -1,4 +1,0 @@
-Django>=5.2,<5.3
-psycopg[binary]
-dj-database-url
-python-dotenv
