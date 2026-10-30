@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — ArogyaSathi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: #f8fafc; color: #0f2039;
+      min-height: 100vh; display: flex;
+    }
+    ::selection { background: rgba(51,102,255,0.12); }
+
+    /* Sidebar */
+    .sidebar {
+      width: 272px; min-height: 100vh;
+      background: linear-gradient(180deg, #0f2039 0%, #111d48 50%, #0f2039 100%);
+      color: #e2e8f0; padding: 24px 16px;
+      display: flex; flex-direction: column; gap: 20px;
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+    }
+    .sidebar-brand { display: flex; align-items: center; gap: 12px; padding: 0 8px; }
+    .sidebar-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: linear-gradient(135deg, #3366ff, #1a4fd4);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 20px; font-weight: 900;
+      box-shadow: 0 6px 16px rgba(51,102,255,0.25);
+    }
+    .sidebar-title { font-weight: 800; font-size: 18px; color: white; letter-spacing: -0.02em; }
+    .sidebar-sub { font-size: 10px; color: rgba(139,179,255,0.5); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+    .sidebar-section { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 12px; }
+    .sidebar-nav { display: flex; flex-direction: column; gap: 2px; }
+    .sidebar-link {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: 12px;
+      font-size: 13px; font-weight: 500; color: rgba(203,213,225,0.8);
+      text-decoration: none; transition: all 0.2s;
+    }
+    .sidebar-link:hover { background: rgba(255,255,255,0.06); color: white; }
+    .sidebar-link.active {
+      background: linear-gradient(135deg, rgba(51,102,255,0.85), rgba(26,79,212,0.85));
+      color: white; font-weight: 600;
+      box-shadow: 0 4px 12px rgba(51,102,255,0.2);
+    }
+    .sidebar-footer {
+      margin-top: auto; padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 0 8px; }
+    .sidebar-avatar {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: linear-gradient(135deg, #3366ff, #1a4fd4);
+      color: white; font-weight: 700; font-size: 11px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sidebar-username { font-size: 12px; font-weight: 700; color: white; }
+    .sidebar-role { font-size: 10px; color: #64748b; }
+
+    /* Main Content */
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar {
+      height: 64px; background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(16px); border-bottom: 1px solid rgba(226,232,240,0.6);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; position: sticky; top: 0; z-index: 30;
+    }
+    .breadcrumb { font-size: 12px; color: #94a3b8; font-weight: 500; }
+    .breadcrumb strong { color: #0f2039; font-weight: 700; }
+    .user-chip { display: flex; align-items: center; gap: 8px; }
+    .user-chip-avatar {
+      width: 36px; height: 36px; border-radius: 12px;
+      background: linear-gradient(135deg, #3366ff, #1a4fd4);
+      color: white; font-weight: 700; font-size: 12px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 8px rgba(51,102,255,0.15);
+    }
+    .content { flex: 1; padding: 32px; overflow-y: auto; }
+
+    /* Welcome Banner */
+    .welcome-banner {
+      border-radius: 16px; padding: 32px;
+      background: linear-gradient(135deg, #0f2039, #111d48, #172f75);
+      color: white; position: relative; overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    }
+    .welcome-blur { position: absolute; top: 0; right: 0; width: 256px; height: 256px; border-radius: 50%; background: rgba(51,102,255,0.1); filter: blur(60px); }
+    .welcome-badge { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(139,179,255,0.5); margin-bottom: 8px; }
+    .welcome-banner h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; position: relative; z-index: 1; }
+    .welcome-banner p { font-size: 14px; color: rgba(203,213,225,0.7); margin-top: 8px; position: relative; z-index: 1; }
+
+    /* Info Card */
+    .info-card {
+      background: white; border-radius: 16px;
+      border: 1px solid rgba(226,232,240,0.6);
+      padding: 24px; margin-top: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 6px 16px rgba(0,0,0,0.04);
+    }
+    .info-card p { font-size: 14px; color: #64748b; line-height: 1.7; }
+    .info-card a {
+      color: #3366ff; font-weight: 700; text-decoration: none;
+      transition: color 0.2s;
+    }
+    .info-card a:hover { color: #1a4fd4; }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .content { padding: 16px; }
+      .topbar { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-icon">✚</div>
+      <div>
+        <div class="sidebar-title">ArogyaSathi</div>
+        <div class="sidebar-sub">Health Management</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">Workspace</div>
+    <nav class="sidebar-nav">
+      <a href="/dashboard/" class="sidebar-link active">📊 Overview</a>
+      <a href="/admin/" class="sidebar-link">👥 Staff Directory</a>
+      <a href="/admin/" class="sidebar-link">📋 Reports</a>
+      <a href="/admin/" class="sidebar-link">🔗 Affiliations</a>
+      <a href="/admin/" class="sidebar-link">🔔 Notifications</a>
+      <a href="/admin/" class="sidebar-link">⚙️ Settings</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="/admin/" target="_blank" class="sidebar-link">Django Admin ↗</a>
+      <div class="sidebar-user" style="margin-top: 12px;">
+        <div class="sidebar-avatar">{{ user.username|make_list|first|upper }}{{ user.username|make_list|last|upper }}</div>
+        <div>
+          <div class="sidebar-username">{{ user.username }}</div>
+          <div class="sidebar-role">Administrator</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="topbar">
+      <div class="breadcrumb">
+        ArogyaSathi › <strong>Dashboard Overview</strong>
+      </div>
+      <div class="user-chip">
+        <div>
+          <div style="font-size:12px;font-weight:700;">{{ user.username }}</div>
+          <div style="font-size:10px;color:#94a3b8;">Authenticated</div>
+        </div>
+        <div class="user-chip-avatar">{{ user.username|make_list|first|upper }}</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="welcome-banner">
+        <div class="welcome-blur"></div>
+        <div class="welcome-badge">Dashboard Overview</div>
+        <h1>Welcome, {{ user.username }}</h1>
+        <p>This is the Django server-rendered dashboard. For the full interactive SPA experience, launch the React frontend.</p>
+      </div>
+
+      <div class="info-card">
+        <p>
+          The full ArogyaSathi workspace with staff management, health returns, affiliation networks, and real-time notifications is available via the
+          <a href="http://localhost:5173/app/dashboard">React Frontend Application →</a>
+        </p>
+        <p style="margin-top: 12px;">
+          <a href="/admin/">Django Admin Panel →</a> &nbsp;|&nbsp;
+          <a href="{% url 'logout' %}">Sign Out</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

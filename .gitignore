@@ -1,0 +1,29 @@
+# Environment configuration and local credentials
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+medical_clinics/string.txt
+
+# Local databases and uploaded data
+*.sqlite3
+medical_clinics/media/
+medical_clinics/staticfiles/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+venv_mac/
+
+# Node and generated frontend output
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Operating system
+.DS_Store

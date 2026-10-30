@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ArogyaSathi — Healthcare Coordination Platform</title>
+  <meta name="description" content="ArogyaSathi connects Primary Health Centres, Sub-Centres, and frontline health workers into a unified care network." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background: #f8fafc;
+      color: #0f2039;
+    }
+    ::selection { background: rgba(51,102,255,0.12); }
+
+    /* Header */
+    .header {
+      height: 80px;
+      border-bottom: 1px solid rgba(226,232,240,0.6);
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .brand-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: linear-gradient(135deg, #3366ff, #1a4fd4);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 20px; font-weight: 900;
+      box-shadow: 0 8px 20px rgba(51,102,255,0.2);
+    }
+    .brand-name { font-size: 20px; font-weight: 800; color: #0f2039; letter-spacing: -0.02em; }
+    .brand-tag {
+      display: inline-block; margin-left: 10px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; padding: 4px 10px; border-radius: 999px;
+      background: #eef4ff; color: #3366ff; border: 1px solid #dae6ff;
+    }
+    .nav-links { display: flex; align-items: center; gap: 16px; }
+    .nav-links a {
+      text-decoration: none; font-size: 14px; font-weight: 600; color: #64748b;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: #3366ff; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 24px; border-radius: 12px; font-size: 14px; font-weight: 700;
+      color: white; background: linear-gradient(135deg, #3366ff, #1a4fd4);
+      text-decoration: none; border: none; cursor: pointer;
+      box-shadow: 0 6px 20px rgba(51,102,255,0.2);
+      transition: all 0.2s;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 28px rgba(51,102,255,0.3);
+    }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 24px; border-radius: 12px; font-size: 14px; font-weight: 700;
+      color: #3366ff; background: white; border: 1px solid #e2e8f0;
+      text-decoration: none; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-outline:hover { border-color: #bdd4ff; background: #eef4ff; }
+
+    /* Hero */
+    .hero {
+      position: relative; overflow: hidden;
+      padding: 80px 32px 100px;
+      max-width: 1280px; margin: 0 auto;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, #f8fafc, rgba(51,102,255,0.04), rgba(16,185,129,0.03));
+    }
+    .hero-blur-1 {
+      position: absolute; top: 40px; right: -100px;
+      width: 500px; height: 500px; border-radius: 50%;
+      background: rgba(51,102,255,0.06); filter: blur(80px);
+    }
+    .hero-blur-2 {
+      position: absolute; bottom: -60px; left: -100px;
+      width: 400px; height: 400px; border-radius: 50%;
+      background: rgba(16,185,129,0.04); filter: blur(80px);
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 640px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px; border-radius: 999px;
+      background: white; border: 1px solid #e2e8f0;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #3366ff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      margin-bottom: 24px;
+    }
+    .hero-badge .dot {
+      width: 8px; height: 8px; border-radius: 50%; background: #10b981;
+      animation: dotPulse 2s ease-in-out infinite;
+    }
+    .hero h1 {
+      font-size: clamp(36px, 5vw, 56px); font-weight: 800;
+      color: #0f2039; letter-spacing: -0.03em; line-height: 1.1;
+    }
+    .text-gradient {
+      background: linear-gradient(135deg, #3366ff, #10b981);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 18px; color: #64748b; margin-top: 16px;
+      line-height: 1.7; max-width: 540px;
+    }
+    .hero-actions { display: flex; gap: 16px; margin-top: 28px; flex-wrap: wrap; }
+
+    /* Features */
+    .features {
+      background: #f8fafc; border-top: 1px solid rgba(226,232,240,0.6);
+      padding: 96px 32px;
+    }
+    .features-inner { max-width: 1280px; margin: 0 auto; }
+    .section-badge {
+      display: inline-flex; padding: 4px 12px; border-radius: 999px;
+      background: white; border: 1px solid #e2e8f0;
+      font-size: 11px; font-weight: 700; color: #3366ff;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .section-title {
+      font-size: clamp(28px, 4vw, 40px); font-weight: 800;
+      color: #0f2039; margin-top: 16px; letter-spacing: -0.02em;
+    }
+    .section-desc { font-size: 18px; color: #64748b; margin-top: 12px; line-height: 1.6; max-width: 640px; }
+    .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 56px; }
+    .feature-card {
+      padding: 28px; border-radius: 16px; background: white;
+      border: 1px solid rgba(226,232,240,0.8);
+      transition: all 0.3s ease;
+    }
+    .feature-card:hover { border-color: #bdd4ff; box-shadow: 0 12px 28px rgba(0,0,0,0.06); transform: translateY(-4px); }
+    .feature-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: #eef4ff; display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px; font-size: 22px;
+    }
+    .feature-card h3 { font-size: 18px; font-weight: 700; color: #0f2039; margin-bottom: 8px; }
+    .feature-card p { font-size: 14px; color: #64748b; line-height: 1.7; }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid rgba(226,232,240,0.6);
+      padding: 40px 32px; text-align: center;
+    }
+    .footer-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+    .footer a { color: #64748b; text-decoration: none; font-size: 13px; font-weight: 600; transition: color 0.2s; }
+    .footer a:hover { color: #3366ff; }
+    .footer-brand { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #94a3b8; }
+    .footer-brand strong { color: #0f2039; font-weight: 800; }
+
+    @keyframes dotPulse {
+      0%,100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.7; }
+    }
+
+    @media (max-width: 640px) {
+      .header { padding: 0 16px; }
+      .hero { padding: 48px 16px 64px; }
+      .features { padding: 64px 16px; }
+      .brand-tag { display: none; }
+      .footer-inner { flex-direction: column; gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header">
+      <a href="/" class="brand">
+        <div class="brand-icon">✚</div>
+        <span class="brand-name">ArogyaSathi</span>
+        <span class="brand-tag">Healthcare Platform</span>
+      </a>
+      <nav class="nav-links">
+        {% if user.is_authenticated %}
+          <a href="/dashboard/" class="btn-primary">Go to Dashboard →</a>
+        {% else %}
+          <a href="/login/">Sign in</a>
+          <a href="/login/" class="btn-primary">Launch App</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-blur-1"></div>
+    <div class="hero-blur-2"></div>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="dot"></span>
+        Community Care Coordination System
+      </div>
+      <h1>Care teams, <span class="text-gradient">seamlessly connected.</span></h1>
+      <p>ArogyaSathi connects Primary Health Centres, rural Sub-Centres, and frontline ASHA/ANM workers into a unified care network powered by PostgreSQL.</p>
+      <div class="hero-actions">
+        {% if user.is_authenticated %}
+          <a href="/dashboard/" class="btn-primary">Open Dashboard →</a>
+        {% else %}
+          <a href="/login/" class="btn-primary">Get Started →</a>
+        {% endif %}
+        <a href="#features" class="btn-outline">Explore Capabilities</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <div class="features-inner">
+      <span class="section-badge">Care Infrastructure</span>
+      <h2 class="section-title">Built for rural and primary healthcare.</h2>
+      <p class="section-desc">Every feature maps to real backend entities with facility-scoped data isolation and audit trails.</p>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">👥</div>
+          <h3>Staff & Frontline Directory</h3>
+          <p>Manage ASHA workers, ANMs, and supervisors with facility-unique employee codes and role classification.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📋</div>
+          <h3>Versioned Health Returns</h3>
+          <p>Submit periodic returns with date validation and immutable JSON report versions and transaction logging.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔗</div>
+          <h3>Affiliation Networks</h3>
+          <p>Sub-Centres request PHC linkages with permissions. PHC officers review and approve with decision reasons.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <strong>ArogyaSathi</strong> — Primary & Community Care Coordination
+      </div>
+      <div style="display:flex;gap:20px;">
+        <a href="/login/">Sign In</a>
+        <a href="/admin/" target="_blank">Admin Portal ↗</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
