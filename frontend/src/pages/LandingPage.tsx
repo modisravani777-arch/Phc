@@ -13,6 +13,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { FractalDotGrid } from '../components/ui/FractalDotGrid';
 
 const features = [
   {
@@ -96,10 +97,28 @@ export const LandingPage: React.FC = () => {
       <main>
         {/* Hero Section */}
         <section className="relative overflow-hidden py-20 sm:py-28 border-b border-slate-200/80 bg-gradient-to-b from-white via-blue-50/20 to-slate-50">
+          {/* Subtle Live Kinetic Dot Grid */}
+          <div className="absolute inset-0 z-0 opacity-40">
+            <FractalDotGrid
+              dotSize={4.2}
+              dotSpacing={18}
+              dotOpacity={0.45}
+              waveIntensity={65}
+              waveRadius={220}
+              waveSpeed={0.85}
+              waveMode="harmonic"
+              dotColor="#3b82f6"
+              glowColor="#0ea5e9"
+              enableMouseGlow={true}
+              enableClickRipples={true}
+              initialPerformance="high"
+            />
+          </div>
+
           <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-teal-400/10 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="mx-auto max-w-7xl px-4 sm:px-8">
+          <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-8">
             <div className="mx-auto max-w-3xl text-center space-y-6">
               <div className="inline-flex items-center gap-2 rounded-full border border-blue-200/70 bg-blue-50/80 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-xs">
                 <ShieldCheck className="h-4 w-4 text-blue-600" />
